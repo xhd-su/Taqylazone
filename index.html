@@ -1,1 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Programme d'entraînement — Taqy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121110;
+    --bg-raised:#1b1a18;
+    --bg-raised-2:#221f1c;
+    --line:#33302b;
+    --text:#f2ede4;
+    --muted:#a49c8d;
+    --muted-dim:#6f695e;
+    --red:#e5432d;
+    --red-dim:#5a2a22;
+    --grey-tag:#3a3733;
+    --grey-tag-text:#c9c2b3;
+    font-family:'Inter',system-ui,sans-serif;
+  }
+  :root:not([data-theme="light"]){ }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.045) 1px, transparent 0);
+    background-size:22px 22px;
+  }
+  h1,h2,h3,.display{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    margin:0;
+  }
+  a{color:inherit;}
+  button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
 
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:56px 0 32px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .kicker{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-size:clamp(38px,7vw,64px);
+    line-height:0.98;
+    font-weight:700;
+  }
+  .hero h1 span{display:block;}
+  .athlete-badge{
+    text-align:right;
+    flex-shrink:0;
+  }
+  .athlete-badge .name{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    font-size:22px;
+    font-weight:600;
+    color:var(--red);
+    line-height:1.15;
+  }
+  .athlete-badge svg{margin-top:8px;width:56px;height:56px;}
+
+  /* ---------- TABS ---------- */
+  .tabbar{
+    display:flex;
+    gap:4px;
+    margin:32px 0 0;
+    border-bottom:1px solid var(--line);
+    overflow-x:auto;
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    background:var(--bg);
+    z-index:20;
+  }
+  .tab{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    font-size:15px;
+    letter-spacing:0.02em;
+    color:var(--muted);
+    background:none;
+    border:none;
+    padding:14px 18px;
+    min-height:48px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+    flex:1;
+    transition:color .15s ease;
+  }
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--text);border-bottom-color:var(--red);}
+
+  /* ---------- DAY PANEL ---------- */
+  .day-panel{display:none;padding:28px 0 8px;}
+  .day-panel.active{display:block;}
+
+  .day-progress{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .bar{
+    flex:1;
+    height:6px;
+    background:var(--bg-raised-2);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    background:var(--red);
+    width:0%;
+    transition:width .25s ease;
+  }
+  .progress-label{
+    font-size:13px;
+    color:var(--muted);
+    white-space:nowrap;
+    min-width:64px;
+    text-align:right;
+  }
+
+  .ex-row{
+    display:grid;
+    grid-template-columns:32px 1fr auto;
+    align-items:center;
+    gap:16px;
+    padding:16px 6px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background-color .1s ease;
+  }
+  .ex-row:active{background:var(--bg-raised);}
+  .ex-row:last-child{border-bottom:none;}
+  .ex-check{
+    width:24px;height:24px;
+    border:2px solid var(--muted-dim);
+    border-radius:6px;
+    cursor:pointer;
+    position:relative;
+    flex-shrink:0;
+    background:none;
+    padding:0;
+  }
+  .ex-check.checked{
+    background:var(--red);
+    border-color:var(--red);
+  }
+  .ex-check.checked::after{
+    content:"";
+    position:absolute;
+    left:6px;top:2px;
+    width:5px;height:10px;
+    border:solid var(--bg);
+    border-width:0 2px 2px 0;
+    transform:rotate(40deg);
+  }
+  .ex-name{
+    font-size:16px;
+    font-weight:500;
+  }
+  .ex-name.checked-text{
+    color:var(--muted-dim);
+    text-decoration:line-through;
+  }
+  .ex-name small{
+    display:block;
+    font-size:12.5px;
+    color:var(--muted);
+    font-weight:400;
+    margin-top:2px;
+  }
+  .tags{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  .tag{
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:4px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .tag.high{background:var(--red-dim);color:#ffb3a3;}
+  .tag.mid{background:var(--grey-tag);color:var(--grey-tag-text);}
+
+  .reset-row{
+    margin-top:18px;
+    text-align:right;
+  }
+  .reset-btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    background:none;
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:7px 14px;
+    cursor:pointer;
+  }
+  .reset-btn:hover{color:var(--text);border-color:var(--muted-dim);}
+
+  /* ---------- REMARQUES ---------- */
+  .remarques{
+    margin-top:44px;
+    padding:22px 0 0;
+    border-top:1px solid var(--line);
+  }
+  .remarques h2{font-size:14px;color:var(--muted);letter-spacing:0.03em;margin-bottom:14px;}
+  .remarques ul{
+    list-style:none;
+    margin:0;padding:0;
+    display:grid;
+    gap:10px;
+  }
+  .remarques li{
+    display:flex;
+    gap:10px;
+    font-size:14.5px;
+    color:var(--text);
+    line-height:1.5;
+  }
+  .remarques li::before{
+    content:"";
+    flex-shrink:0;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--red);
+    margin-top:8px;
+  }
+  .legend{
+    display:flex;gap:18px;flex-wrap:wrap;
+    margin-top:16px;
+    font-size:12.5px;
+    color:var(--muted);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.red{background:var(--red);}
+  .dot.grey{background:var(--grey-tag-text);}
+
+  /* ---------- CONSEILS ---------- */
+  .conseils{
+    margin-top:64px;
+    padding:44px 0 60px;
+    border-top:1px solid var(--line);
+  }
+  .conseils .kicker{margin-bottom:10px;}
+  .conseils h2.title{
+    font-size:clamp(26px,4vw,36px);
+    margin-bottom:34px;
+    max-width:560px;
+    line-height:1.05;
+  }
+  .cgrid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  @media (max-width:640px){ .cgrid{grid-template-columns:1fr;} }
+  .cnote{
+    background:var(--bg);
+    padding:22px;
+  }
+  .cnote .num{
+    font-family:'Oswald',sans-serif;
+    color:var(--red);
+    font-size:13px;
+    letter-spacing:0.04em;
+    margin-bottom:8px;
+    display:block;
+  }
+  .cnote h3{
+    font-size:17px;
+    text-transform:none;
+    font-weight:600;
+    margin-bottom:8px;
+    font-family:'Inter',sans-serif;
+    letter-spacing:0;
+  }
+  .cnote p{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.55;
+    margin:0;
+  }
+
+  footer{
+    padding:26px 0 40px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--muted-dim);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  ::selection{background:var(--red);color:#fff;}
+  :focus-visible{outline:2px solid var(--red);outline-offset:2px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+
+  /* ---------- MOBILE (usage en salle) ---------- */
+  @media (max-width:600px){
+    .wrap{padding:0 16px;}
+    .hero{padding:24px 0 0;}
+    .hero-top{gap:14px;}
+    .kicker{margin-bottom:8px;font-size:12px;}
+    .hero h1{font-size:32px;}
+    .athlete-badge .name{font-size:16px;}
+    .athlete-badge svg{width:36px;height:36px;margin-top:4px;}
+    .tabbar{margin-top:18px;}
+    .tab{font-size:13px;padding:13px 8px;letter-spacing:0.01em;}
+    .day-panel{padding:20px 0 8px;}
+    .day-progress{margin-bottom:16px;}
+    .ex-row{
+      grid-template-columns:26px 1fr;
+      row-gap:8px;
+      padding:14px 4px;
+    }
+    .ex-check{grid-row:1;grid-column:1;width:23px;height:23px;}
+    .ex-name{grid-row:1;grid-column:2;font-size:15.5px;}
+    .tags{grid-row:2;grid-column:2;justify-content:flex-start;}
+    .conseils{padding:36px 0 44px;}
+    .conseils .title{margin-bottom:24px;}
+    .cnote{padding:18px;}
+    footer{flex-direction:column;gap:4px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="kicker">Par Mahi Chahid</div>
+        <h1><span>Programme</span><span>d'entraînement</span></h1>
+      </div>
+      <div class="athlete-badge">
+        <div class="name">Taqy</div>
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="50" cy="50" r="48" stroke="#e5432d" stroke-width="2"/>
+          <path d="M30 62c2-10 6-16 8-22 1-3 4-5 7-5h10c3 0 6 2 7 5 2 6 6 12 8 22" stroke="#f2ede4" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="50" cy="26" r="7" stroke="#f2ede4" stroke-width="3"/>
+          <path d="M33 44c-4 2-7 6-8 11M67 44c4 2 7 6 8 11" stroke="#f2ede4" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="tabbar" role="tablist" aria-label="Jours d'entraînement">
+      <button class="tab active" data-day="push" role="tab" aria-selected="true">Push</button>
+      <button class="tab" data-day="pull" role="tab" aria-selected="false">Pull</button>
+      <button class="tab" data-day="legs" role="tab" aria-selected="false">Jambes / Abdos</button>
+    </div>
+  </div>
+
+  <!-- PUSH -->
+  <div class="day-panel active" id="panel-push">
+    <div class="day-progress">
+      <div class="bar"><div class="bar-fill" id="bar-push"></div></div>
+      <div class="progress-label" id="label-push">0/6</div>
+    </div>
+    <div class="ex-list" data-day="push">
+      <div class="ex-row" data-id="push-1">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Bench press / Chest press<small>Warmup · 2×5–8, puis 1×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="push-2">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Vertical press (épaules)<small>Warmup · 2×5–8</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="push-3">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Triceps pushup<small>2×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="push-4">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Lateral raises<small>2×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="push-5">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Triceps pushdown<small>1×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="push-6">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Chest fly<small>1×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+    </div>
+    <div class="reset-row"><button class="reset-btn" data-reset="push">Réinitialiser Push</button></div>
+  </div>
+
+  <!-- PULL -->
+  <div class="day-panel" id="panel-pull">
+    <div class="day-progress">
+      <div class="bar"><div class="bar-fill" id="bar-pull"></div></div>
+      <div class="progress-label" id="label-pull">0/5</div>
+    </div>
+    <div class="ex-list" data-day="pull">
+      <div class="ex-row" data-id="pull-1">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Rows (horizontal)<small>Warmup · 2×5–8, puis 1×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="pull-2">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Lat pulldown<small>Warmup · 2×5–8, puis 1×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="pull-3">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Rear delts<small>2×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="pull-4">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Curls (front)<small>1×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="pull-5">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Curls (behind)<small>1×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+    </div>
+    <div class="reset-row"><button class="reset-btn" data-reset="pull">Réinitialiser Pull</button></div>
+  </div>
+
+  <!-- LEGS -->
+  <div class="day-panel" id="panel-legs">
+    <div class="day-progress">
+      <div class="bar"><div class="bar-fill" id="bar-legs"></div></div>
+      <div class="progress-label" id="label-legs">0/5</div>
+    </div>
+    <div class="ex-list" data-day="legs">
+      <div class="ex-row" data-id="legs-1">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Leg press<small>Warmup · 2×6–10</small></div>
+        <div class="tags"><span class="tag mid">Modérée</span></div>
+      </div>
+      <div class="ex-row" data-id="legs-2">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Leg extension<small>2×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="legs-3">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Leg curls<small>2×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="legs-4">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Calf raises<small>1×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+      <div class="ex-row" data-id="legs-5">
+        <button class="ex-check" aria-label="Cocher"></button>
+        <div class="ex-name">Crunch (abdos)<small>2×6–10, puis 1× à l'échec</small></div>
+        <div class="tags"><span class="tag high">Élevée</span></div>
+      </div>
+    </div>
+    <div class="reset-row"><button class="reset-btn" data-reset="legs">Réinitialiser Jambes</button></div>
+  </div>
+
+  <div class="remarques">
+    <h2>Remarques du coach</h2>
+    <ul>
+      <li>Intensité élevée sur les séries marquées « Élevée » (à l'échec), intensité modérée sur le reste.</li>
+      <li>Pour le cardio : escaliers ou marche inclinée.</li>
+      <li>Sur les warmups, monte en charge progressivement jusqu'à ta charge de travail — autant de séries que nécessaire.</li>
+      <li>Rythme : 3 séances salle par semaine (une rotation Push / Pull / Jambes complète) + 3 séances de JJB — soit 6 jours d'entraînement, à gérer avec attention côté récupération.</li>
+    </ul>
+    <div class="legend">
+      <span><span class="dot red"></span> Intensité élevée / échec</span>
+      <span><span class="dot grey"></span> Intensité modérée</span>
+    </div>
+  </div>
+
+  <div class="conseils">
+    <div class="kicker">Regard extérieur</div>
+    <h2 class="title">Pistes d'amélioration, avec 3 séances salle + 3 séances de JJB par semaine</h2>
+    <div class="cgrid">
+      <div class="cnote">
+        <span class="num">01</span>
+        <h3>Positionne les jambes loin d'une grosse séance de JJB</h3>
+        <p>Le JJB sollicite énormément les jambes et les hanches (garde, projections, déplacements). Évite de placer la séance Jambes juste avant ou juste après une séance de JJB intense : idéalement laisse au moins une journée entre les deux pour ne pas rouler sur des jambes lourdes ni arriver fatigué en salle.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">02</span>
+        <h3>Attention au grip et aux avant-bras</h3>
+        <p>Les curls (Pull) et le JJB (kimono, contrôles) sollicitent tous les deux les avant-bras et les mains. Si tu sens les avant-bras cuits ou une gêne aux doigts, allège les curls cette semaine-là plutôt que de forcer sur les deux fronts en même temps.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">03</span>
+        <h3>Renforce le cou et les trapèzes</h3>
+        <p>Le JJB met le cou à rude épreuve (ponts, étranglements, pression). Ton programme actuel ne cible pas cette zone : deux séries de ponts de cou ou de shrugs légers, une à deux fois par semaine, réduisent nettement le risque de blessure cervicale.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">04</span>
+        <h3>Note tes charges pour piloter la fatigue</h3>
+        <p>Avec 6 séances par semaine, la fatigue s'accumule vite. Note poids et sensations à chaque séance salle : si les charges stagnent ou baissent sur 2 semaines d'affilée, c'est souvent le signe qu'il faut un jour de repos complet plutôt qu'une séance de plus.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">05</span>
+        <h3>Décharge toutes les 4 à 6 semaines</h3>
+        <p>Le cumul salle + JJB est un volume d'entraînement élevé. Une semaine allégée (sans séries à l'échec, JJB en drilling plutôt qu'en sparring dur) toutes les 4 à 6 semaines évite le surmenage, plus fréquente que pour quelqu'un qui ne ferait que de la musculation.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">06</span>
+        <h3>Mobilité épaules et hanches</h3>
+        <p>Les clés de bras et les luttes au sol exigent une bonne mobilité articulaire. 5 à 10 minutes de mobilité épaules/hanches avant le JJB, et après les séances Push/Pull, aident à prévenir les blessures typiques de la discipline.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">07</span>
+        <h3>Renforce le gainage anti-rotation</h3>
+        <p>Le crunch travaille la flexion, alors que le JJB demande surtout de la stabilité en rotation et sous pression. Ajoute une planche ou un pallof press une à deux fois par semaine pour un tronc plus complet et un dos mieux protégé.</p>
+      </div>
+      <div class="cnote">
+        <span class="num">08</span>
+        <h3>Priorise sommeil et protéines</h3>
+        <p>Avec 6 entraînements par semaine, le corps répare pendant le repos, pas pendant l'effort. Vise 1,6 à 2 g de protéines par kg de poids de corps et 7 à 9 heures de sommeil : c'est ce qui permet d'encaisser à la fois la salle et le JJB sans s'épuiser.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Programme original par Mahi Chahid</span>
+    <span>Suivi et conseils ajoutés pour Taqy</span>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var STORAGE_KEY = 'ppl-progress-camille';
+    var state = {};
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) state = JSON.parse(raw);
+    }catch(e){ state = {}; }
+
+    function save(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    }
+
+    function updateBar(day){
+      var rows = document.querySelectorAll('.ex-list[data-day="'+day+'"] .ex-row');
+      var total = rows.length, done = 0;
+      rows.forEach(function(r){ if(state[r.dataset.id]) done++; });
+      var pct = total ? Math.round(done/total*100) : 0;
+      var bar = document.getElementById('bar-'+day);
+      var label = document.getElementById('label-'+day);
+      if(bar) bar.style.width = pct+'%';
+      if(label) label.textContent = done+'/'+total;
+    }
+
+    function applyRowState(row){
+      var id = row.dataset.id;
+      var checked = !!state[id];
+      var btn = row.querySelector('.ex-check');
+      var name = row.querySelector('.ex-name');
+      btn.classList.toggle('checked', checked);
+      btn.setAttribute('aria-pressed', checked ? 'true' : 'false');
+      name.classList.toggle('checked-text', checked);
+    }
+
+    document.querySelectorAll('.ex-row').forEach(function(row){
+      applyRowState(row);
+      row.addEventListener('click', function(){
+        var id = row.dataset.id;
+        state[id] = !state[id];
+        applyRowState(row);
+        save();
+        var day = row.closest('.ex-list').dataset.day;
+        updateBar(day);
+      });
+    });
+
+    ['push','pull','legs'].forEach(updateBar);
+
+    document.querySelectorAll('.reset-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var day = btn.dataset.reset;
+        document.querySelectorAll('.ex-list[data-day="'+day+'"] .ex-row').forEach(function(row){
+          state[row.dataset.id] = false;
+          applyRowState(row);
+        });
+        save();
+        updateBar(day);
+      });
+    });
+
+    // Tabs
+    var tabs = document.querySelectorAll('.tab');
+    var panels = document.querySelectorAll('.day-panel');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        tabs.forEach(function(t){ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+        panels.forEach(function(p){ p.classList.remove('active'); });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected','true');
+        document.getElementById('panel-'+tab.dataset.day).classList.add('active');
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
